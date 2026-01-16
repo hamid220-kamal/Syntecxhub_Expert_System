@@ -12,6 +12,32 @@ const logList = document.getElementById('log-list');
 const micBtn = document.getElementById('mic-btn');
 const statusText = document.getElementById('status-text');
 const voiceToggle = document.getElementById('voice-toggle');
+const modal = document.getElementById('initial-input-modal');
+
+let allLogs = []; // Store logs for report
+
+// Graph Visualization
+function initGraph() {
+    fetch(`${API_URL}/graph`)
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('mynetwork');
+            const nodes = new vis.DataSet(data.nodes);
+            const edges = new vis.DataSet(data.links.map(l => ({ from: l.source, to: l.target })));
+
+            const options = {
+                nodes: { shape: 'dot', size: 10, font: { color: '#fff' } },
+                edges: { color: '#ffffff55' },
+                groups: {
+                    rules: { color: '#ef4444', size: 15 },
+                    facts: { color: '#3b82f6' }
+                },
+                physics: { stabilization: false },
+                layout: { randomSeed: 2 } // Keep consistent layout
+            };
+            new vis.Network(container, { nodes, edges }, options);
+        });
+}
 
 // Voice Synthesis (TTS)
 const synth = window.speechSynthesis;
@@ -88,9 +114,32 @@ function showOptions(type) {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.textContent = 'Start Over';
-        btn.onclick = startSession;
+        btn.onclick = () => modal.style.display = 'flex';
         optionsContainer.appendChild(btn);
+
+        if (type === 'SOLUTION') {
+            const reportBtn = document.createElement('button');
+            reportBtn.className = 'option-btn';
+            reportBtn.textContent = '📄 Download Report';
+            reportBtn.style.background = '#10b981';
+            reportBtn.onclick = () => downloadReport(currentFact); // currentFact holds solution text here roughly
+            optionsContainer.appendChild(reportBtn);
+        }
     }
+}
+
+async function downloadReport(conclusion) {
+    const res = await fetch(`${API_URL}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logs: allLogs, conclusion: conclusion })
+    });
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Diagnostic_Report.pdf';
+    a.click();
 }
 
 function updateLogs(logs) {
@@ -107,12 +156,19 @@ function updateLogs(logs) {
 }
 
 // API Calls
-async function startSession() {
-    chatBox.innerHTML = ''; // Clear chat
+async function startSession(userInput = '') {
+    chatBox.innerHTML = '';
     optionsContainer.innerHTML = '';
+    allLogs = [];
+    logList.innerHTML = '';
+    modal.style.display = 'none'; // Close modal
 
     try {
-        const res = await fetch(`${API_URL}/start`, { method: 'POST' });
+        const res = await fetch(`${API_URL}/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ input: userInput })
+        });
         const data = await res.json();
         processResponse(data);
     } catch (e) {
@@ -146,11 +202,13 @@ function processResponse(data) {
     showOptions(data.type);
 
     if (data.logs) {
-        // Prepend new logs to the list instead of clearing
         data.logs.forEach(log => {
-            const li = document.createElement('li');
-            li.textContent = log;
-            logList.insertBefore(li, logList.firstChild);
+            if (!allLogs.includes(log)) {
+                allLogs.push(log);
+                const li = document.createElement('li');
+                li.textContent = log;
+                logList.insertBefore(li, logList.firstChild);
+            }
         });
     }
 }
@@ -179,7 +237,12 @@ voiceToggle.onclick = () => {
     voiceToggle.innerHTML = voiceEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
 };
 
-document.getElementById('restart-btn').onclick = startSession;
+document.getElementById('restart-btn').onclick = () => modal.style.display = 'flex';
+document.getElementById('start-nlp-btn').onclick = () => startSession(document.getElementById('symptom-input').value);
+document.getElementById('skip-nlp-btn').onclick = () => startSession();
 
 // Initialize
-window.onload = startSession;
+window.onload = () => {
+    modal.style.display = 'flex';
+    initGraph();
+};

@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
 
 <body>
@@ -35,6 +36,11 @@
                 <ul id="log-list">
                     <!-- Logs appear here -->
                 </ul>
+            </div>
+
+            <div class="knowledge-graph-container">
+                <h3><i class="fa-solid fa-project-diagram"></i> Logic Graph</h3>
+                <div id="mynetwork"></div>
             </div>
         </aside>
 
@@ -81,6 +87,18 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <div id="initial-input-modal" class="modal">
+        <div class="modal-content">
+            <h2>Describe your problem</h2>
+            <p>Type what's wrong (e.g., "My screen is black and I hear beeps") or skip to manual diagnosis.</p>
+            <textarea id="symptom-input" placeholder="Enter symptoms..."></textarea>
+            <div class="modal-buttons">
+                <button id="start-nlp-btn" class="option-btn">Analyze & Start</button>
+                <button id="skip-nlp-btn" class="option-btn secondary">Skip</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>

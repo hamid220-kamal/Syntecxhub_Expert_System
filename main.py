@@ -1,7 +1,9 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from expert_system import KnowledgeBase, InferenceEngine
-import os
+from nlp_processor import NLPProcessor
+from fpdf import FPDF
+import datetime
 
 app = Flask(__name__, static_folder='static', template_folder='.')
 CORS(app)
@@ -9,6 +11,7 @@ CORS(app)
 # Initialize Engine
 kb = KnowledgeBase("knowledge_base.json")
 engine = InferenceEngine(kb)
+nlp = NLPProcessor(kb)
 
 # Session state (simple global for single-user local demo)
 # In production, use a database or session store
@@ -22,26 +25,86 @@ def home():
 
 @app.route('/api/start', methods=['POST'])
 def start_session():
+    data = request.json or {}
+    user_input = data.get('input', '')
+    
     engine.reset()
-    # Check if there's an immediate recommendation (unlikely without facts, but good practice)
+    
+    initial_message = "Hello! I am your AI Technical Support Agent."
+    
+    # NLP Processing
+    if user_input:
+        detected_facts = nlp.extract_facts(user_input)
+        if detected_facts:
+            for fact in detected_facts:
+                engine.add_fact(fact)
+            initial_message += f" I detected: {', '.join(detected_facts)}."
+            engine.forward_chain()
+    
+    # Check if there's an immediate recommendation
     type, content = engine.recommend_next_step()
     
     # If no immediate conclusion, start with the most general question
     if type == "NO_CONCLUSION":
-        # Hardcoded starting point for better UX or find question with most rules
+        # Check if we already have facts from NLP that didn't trigger a solution
+        # If so, rely on the engine's next best question.
+        # If not, use start default.
         initial_question = "system_dead" 
-        question_text = kb.get_question(initial_question)
-        return jsonify({
-            "type": "QUESTION",
-            "text": "Hello! I am your AI Technical Support Agent. Let's diagnose your computer. " + question_text,
-            "fact": initial_question
-        })
-    
+        # If system_dead is already known, pick another (simple logic for now)
+        if initial_question in engine.known_facts:
+             # Let engine pick
+             pass
+        else:
+             question_text = kb.get_question(initial_question)
+             return jsonify({
+                 "type": "QUESTION",
+                 "text": f"{initial_message} Let's verify. " + question_text,
+                 "fact": initial_question,
+                 "logs": engine.reasoning_log
+             })
+             
     return jsonify({
         "type": type,
         "text": content,
-        "fact": content.split("::")[0] if "::" in content else None
+        "fact": content.split("::")[0] if "::" in content else None,
+        "logs": engine.reasoning_log
     })
+
+@app.route('/api/graph')
+def get_graph():
+    return jsonify(nlp.get_graph_data())
+
+@app.route('/api/report', methods=['POST'])
+def generate_report():
+    data = request.json
+    logs = data.get('logs', [])
+    conclusion = data.get('conclusion', 'Not Resolved')
+    
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    
+    pdf.cell(200, 10, txt="DIAGNOSTIC REPORT - SYNTECXHUB AI", ln=1, align="C")
+    pdf.cell(200, 10, txt=f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", ln=1, align="C")
+    pdf.ln(10)
+    
+    pdf.set_font("Arial", 'B', size=14)
+    pdf.cell(200, 10, txt="Diagnosis Result:", ln=1)
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, txt=conclusion)
+    pdf.ln(10)
+    
+    pdf.set_font("Arial", 'B', size=14)
+    pdf.cell(200, 10, txt="Reasoning Log:", ln=1)
+    pdf.set_font("Arial", size=10)
+    
+    for log in logs:
+        pdf.cell(200, 8, txt=f"- {log}", ln=1)
+        
+    filename = "diagnostic_report.pdf"
+    pdf.output(filename)
+    
+    return send_from_directory('.', filename)
 
 @app.route('/api/answer', methods=['POST'])
 def answer():
