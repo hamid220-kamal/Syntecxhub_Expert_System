@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tech Support Expert | Syntecxhub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-robot"></i>
+                <span>Syntecxhub AI</span>
+            </div>
+
+            <div class="domain-selector">
+                <div class="domain-item active">
+                    <i class="fa-solid fa-laptop-medical"></i>
+                    <span>PC Repair</span>
+                </div>
+                <div class="domain-item disabled" title="Coming Soon">
+                    <i class="fa-solid fa-car-side"></i>
+                    <span>Car Diagnostics</span>
+                </div>
+            </div>
+
+            <div class="inference-log">
+                <h3><i class="fa-solid fa-brain"></i> AI Reasoning</h3>
+                <ul id="log-list">
+                    <!-- Logs appear here -->
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-interface">
+            <header>
+                <div class="header-info">
+                    <h2>Universal Troubleshooter</h2>
+                    <p>Powered by Hybrid Rule-Based Engine</p>
+                </div>
+                <div class="header-controls">
+                    <button id="voice-toggle" class="icon-btn" title="Toggle Voice Output">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                    <button id="restart-btn" class="icon-btn secondary" title="Restart Session">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div id="chat-box" class="chat-box">
+                <!-- Messages go here -->
+                <div class="message bot">
+                    <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div class="content">
+                        Initializing Expert System...
+                        <div class="typing-indicator">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-area">
+                <div id="options-container" class="options-container">
+                    <!-- Yes/No buttons will appear here -->
+                </div>
+
+                <div class="voice-input-wrapper">
+                    <button id="mic-btn" class="mic-btn">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <div class="status-text" id="status-text">Ready to listen...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

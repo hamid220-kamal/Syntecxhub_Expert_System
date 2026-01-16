@@ -1,0 +1,65 @@
+{
+    "metadata": {
+        "domain": "PC Repair Expert",
+        "description": "Diagnoses common computer hardware and software issues",
+        "version": "1.0"
+    },
+    "rules": [
+        {
+            "id": "power_issue_1",
+            "if": ["system_dead", "no_lights"],
+            "then": "check_power_cable",
+            "explanation": "If the system is completely unresponsive with no lights, the power cable is the first suspect."
+        },
+        {
+            "id": "power_issue_2",
+            "if": ["check_power_cable", "cable_secure"],
+            "then": "check_outlet",
+            "explanation": "If the cable is secure but there's still no power, verify the wall outlet works."
+        },
+        {
+            "id": "boot_issue_1",
+            "if": ["lights_on", "screen_black", "no_beeps"],
+            "then": "check_monitor_cable",
+            "explanation": "Lights indicate the PC has power. A black screen suggests a display issue."
+        },
+        {
+            "id": "boot_issue_2",
+            "if": ["lights_on", "screen_black", "hear_beeps"],
+            "then": "check_ram_seating",
+            "explanation": "Beep codes often indicate hardware initialization failures, commonly RAM."
+        },
+        {
+            "id": "slow_pc_1",
+            "if": ["pc_boots", "system_slow"],
+            "then": "check_high_cpu",
+            "explanation": "Slow performance is often caused by a rogue process consuming CPU."
+        },
+        {
+            "id": "slow_pc_2",
+            "if": ["pc_boots", "system_slow", "cpu_normal"],
+            "then": "check_disk_space",
+            "explanation": "If CPU usage is normal, a full hard drive can cause significant slowdowns."
+        }
+    ],
+    "questions": {
+        "system_dead": "Does the computer show absolutely no signs of life (no fans, no lights)?",
+        "no_lights": "Are there no LED lights visible on the case or motherboard?",
+        "cable_secure": "Is the power cable firmly plugged into both the wall and the PC?",
+        "lights_on": "Do you see fans spinning or LED lights on the case?",
+        "screen_black": "Is the monitor screen completely black?",
+        "no_beeps": "Is the computer silent (no beep sounds on startup)?",
+        "hear_beeps": "Do you hear a series of beeping sounds?",
+        "pc_boots": "Does the computer boot into the operating system?",
+        "system_slow": "Is the system performance noticeably slower than usual?",
+        "cpu_normal": "Is the CPU usage below 50% in Task Manager?"
+    },
+    "solutions": {
+        "check_power_cable": "Please check that the power cable is securely connected.",
+        "check_outlet": "Try plugging another device into the same outlet to verify it has power. You may need a replacement PSU.",
+        "check_monitor_cable": "Ensure the monitor cable (HDMI/DisplayPort) is tightly connected to the GPU.",
+        "check_ram_seating": "Reseat the RAM sticks: Open the case, remove RAM, and click it back in firmly.",
+        "check_high_cpu": "Open Task Manager (Ctrl+Shift+Esc) and close any programs using high CPU.",
+        "check_disk_space": "Check your C: drive. If it's red/full, delete temporary files or uninstall unused games."
+    }
+}
