@@ -7,39 +7,81 @@
     "rules": [
         {
             "id": "power_issue_1",
-            "if": ["system_dead", "no_lights"],
+            "if": [
+                "system_dead",
+                "no_lights"
+            ],
             "then": "check_power_cable",
             "explanation": "If the system is completely unresponsive with no lights, the power cable is the first suspect."
         },
         {
             "id": "power_issue_2",
-            "if": ["check_power_cable", "cable_secure"],
+            "if": [
+                "check_power_cable",
+                "cable_secure"
+            ],
             "then": "check_outlet",
             "explanation": "If the cable is secure but there's still no power, verify the wall outlet works."
         },
         {
             "id": "boot_issue_1",
-            "if": ["lights_on", "screen_black", "no_beeps"],
+            "if": [
+                "lights_on",
+                "no_beeps",
+                "screen_black"
+            ],
             "then": "check_monitor_cable",
             "explanation": "Lights indicate the PC has power. A black screen suggests a display issue."
         },
         {
             "id": "boot_issue_2",
-            "if": ["lights_on", "screen_black", "hear_beeps"],
+            "if": [
+                "lights_on",
+                "hear_beeps",
+                "screen_black"
+            ],
             "then": "check_ram_seating",
             "explanation": "Beep codes often indicate hardware initialization failures, commonly RAM."
         },
         {
             "id": "slow_pc_1",
-            "if": ["pc_boots", "system_slow"],
+            "if": [
+                "system_slow",
+                "pc_boots"
+            ],
             "then": "check_high_cpu",
             "explanation": "Slow performance is often caused by a rogue process consuming CPU."
         },
         {
             "id": "slow_pc_2",
-            "if": ["pc_boots", "system_slow", "cpu_normal"],
+            "if": [
+                "system_slow",
+                "cpu_normal",
+                "pc_boots"
+            ],
             "then": "check_disk_space",
             "explanation": "If CPU usage is normal, a full hard drive can cause significant slowdowns."
+        },
+        {
+            "id": "learned_rule_7",
+            "if": [
+                "lights_on",
+                "no_beeps",
+                "cable_secure",
+                "screen_black"
+            ],
+            "then": "fix_7",
+            "explanation": "Dynamically learned from user feedback."
+        },
+        {
+            "id": "learned_rule_8",
+            "if": [
+                "system_dead",
+                "screen_black",
+                "no_lights"
+            ],
+            "then": "fix_8",
+            "explanation": "Dynamically learned from user feedback - check brightness settings when system appears dead."
         }
     ],
     "questions": {
@@ -55,11 +97,37 @@
         "cpu_normal": "Is the CPU usage below 50% in Task Manager?"
     },
     "solutions": {
-        "check_power_cable": "Please check that the power cable is securely connected.",
-        "check_outlet": "Try plugging another device into the same outlet to verify it has power. You may need a replacement PSU.",
-        "check_monitor_cable": "Ensure the monitor cable (HDMI/DisplayPort) is tightly connected to the GPU.",
-        "check_ram_seating": "Reseat the RAM sticks: Open the case, remove RAM, and click it back in firmly.",
-        "check_high_cpu": "Open Task Manager (Ctrl+Shift+Esc) and close any programs using high CPU.",
-        "check_disk_space": "Check your C: drive. If it's red/full, delete temporary files or uninstall unused games."
+        "check_power_cable": {
+            "text": "Please check that the power cable is securely connected.",
+            "image": "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYzJ4cmd3cnZ4eG14eG14eG14eG14eG14eG14eG14eG14/3o7bu3XilJ5BOiSGic/giphy.gif"
+        },
+        "check_outlet": {
+            "text": "Try plugging another device into the same outlet to verify it has power. You may need a replacement PSU.",
+            "image": "https://media.giphy.com/media/xT9IgzoKnwFNmISR8I/giphy.gif"
+        },
+        "check_monitor_cable": {
+            "text": "Ensure the monitor cable (HDMI/DisplayPort) is tightly connected to the GPU.",
+            "image": "https://media.giphy.com/media/l0HlHjgsezGdqPTiM/giphy.gif"
+        },
+        "check_ram_seating": {
+            "text": "Reseat the RAM sticks: Open the case, remove RAM, and click it back in firmly.",
+            "image": "https://media.giphy.com/media/3o6Zt6ML68TCucdof6/giphy.gif"
+        },
+        "check_high_cpu": {
+            "text": "Open Task Manager (Ctrl+Shift+Esc) and close any programs using high CPU.",
+            "image": null
+        },
+        "check_disk_space": {
+            "text": "Check your C: drive. If it's red/full, delete temporary files or uninstall unused games.",
+            "image": null
+        },
+        "fix_7": {
+            "text": "Try increasing the screen brightness - the display may be set to minimum.",
+            "image": "https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif"
+        },
+        "fix_8": {
+            "text": "Try adjusting the screen brightness - the display may be turned all the way down.",
+            "image": "https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif"
+        }
     }
 }

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Hamid Kamal
+# Syntecxhub AI Internship
+
 from fuzzywuzzy import process
 from expert_system import KnowledgeBase
 

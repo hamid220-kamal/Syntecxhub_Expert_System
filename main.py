@@ -1,3 +1,10 @@
+# Copyright (c) 2026 Hamid Kamal
+# Syntecxhub AI Internship
+#
+# This file is part of the Syntecxhub Expert System project.
+# Unauthorized copying of this file, via any medium is strictly prohibited.
+# Proprietary and confidential.
+
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from expert_system import KnowledgeBase, InferenceEngine
@@ -70,6 +77,30 @@ def start_session():
         "logs": engine.reasoning_log
     })
 
+@app.route('/api/learn', methods=['POST'])
+def learn_rule():
+    data = request.json
+    symptoms = data.get('symptoms', []) # List of fact IDs
+    solution_text = data.get('solution')
+    
+    # 1. Create a new Solution ID
+    solution_id = f"fix_{len(kb.solutions) + 1}"
+    
+    # 2. Add Solution to KB
+    kb.solutions[solution_id] = {
+        "text": solution_text,
+        "image": "https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif" # Generic 'Fixed' GIF
+    }
+    
+    # 3. Add Rule
+    # "IF symptoms THEN solution_id"
+    kb.add_rule(symptoms, solution_id, explanation="Dynamically learned from user feedback.")
+    
+    # 4. Save
+    kb.save_to_file("knowledge_base.json")
+    
+    return jsonify({"status": "success", "message": "I have learned this new solution!"})
+    
 @app.route('/api/graph')
 def get_graph():
     return jsonify(nlp.get_graph_data())
@@ -78,7 +109,7 @@ def get_graph():
 def generate_report():
     data = request.json
     logs = data.get('logs', [])
-    conclusion = data.get('conclusion', 'Not Resolved')
+    conclusion = data.get('conclusion') or 'Not Resolved'
     
     pdf = FPDF()
     pdf.add_page()
@@ -99,7 +130,9 @@ def generate_report():
     pdf.set_font("Arial", size=10)
     
     for log in logs:
-        pdf.cell(200, 8, txt=f"- {log}", ln=1)
+        # Safely encode text for PDF (filter out non-latin characters)
+        safe_log = ''.join(c if ord(c) < 256 else '?' for c in log)
+        pdf.cell(200, 8, txt=f"- {safe_log}", ln=1)
         
     filename = "diagnostic_report.pdf"
     pdf.output(filename)
@@ -111,6 +144,10 @@ def answer():
     data = request.json
     fact = data.get('fact')
     answer = data.get('answer') # "yes" or "no"
+    
+    # Always mark this fact as queried so we don't ask again
+    if fact:
+        engine.mark_as_queried(fact)
     
     if answer.lower() == "yes":
         engine.add_fact(fact)
