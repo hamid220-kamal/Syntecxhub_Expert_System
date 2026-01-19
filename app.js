@@ -367,6 +367,37 @@ document.getElementById('skip-nlp-btn').onclick = () => startSession();
 document.getElementById('submit-learning').onclick = submitLearning;
 document.getElementById('dash-report-btn').onclick = () => downloadReport(activeFact);
 
+/** Domain Switching Logic */
+async function switchDomain(domain) {
+    if (document.getElementById(`domain-${domain}`).classList.contains('active')) return;
+
+    // Visual Updates
+    document.querySelectorAll('.domain-item').forEach(el => el.classList.remove('active'));
+    document.getElementById(`domain-${domain}`).classList.add('active');
+
+    try {
+        const res = await fetch(`${API_ROOT}/switch_domain`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ domain })
+        });
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            showToast(`Active Domain: ${data.domain_meta.domain}`, 'success');
+            // Reset Session
+            chatBox.innerHTML = '';
+            optionsContainer.innerHTML = '';
+            sessionLogs = [];
+            logList.innerHTML = '';
+            syncKnowledgeGraph();
+            startSession(); // Auto start new session
+        }
+    } catch (e) {
+        showToast("Failed to switch domain", "warning");
+    }
+}
+
 // --- 3D & Visual Effects Module ---
 // --- 3D & High-Fidelity Visual Effects Module ---
 

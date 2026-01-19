@@ -16,19 +16,37 @@ app = Flask(__name__, static_folder='static', template_folder='.')
 CORS(app)
 
 # Initialize Engine
-kb = KnowledgeBase("knowledge_base.json")
+kbs = {
+    "pc": KnowledgeBase("knowledge_base.json"),
+    "car": KnowledgeBase("car_knowledge_base.json")
+}
+current_domain = "pc"
+kb = kbs[current_domain]
 engine = InferenceEngine(kb)
 nlp = NLPProcessor(kb)
-
-# Session state (simple global for single-user local demo)
-# In production, use a database or session store
-current_session = {
-    "engine": engine
-}
 
 @app.route('/')
 def home():
     return send_from_directory('.', 'index.html')
+
+@app.route('/api/switch_domain', methods=['POST'])
+def switch_domain():
+    global kb, engine, nlp, current_domain
+    data = request.json
+    domain_key = data.get('domain')
+    
+    if domain_key in kbs:
+        current_domain = domain_key
+        kb = kbs[domain_key]
+        # Re-initialize engine and nlp with new KB
+        engine = InferenceEngine(kb)
+        nlp = NLPProcessor(kb)
+        return jsonify({
+            "status": "success", 
+            "message": f"Switched to {kb.metadata.get('domain')}",
+            "domain_meta": kb.metadata
+        })
+    return jsonify({"status": "error", "message": "Invalid domain"}), 400
 
 @app.route('/api/start', methods=['POST'])
 def start_session():
@@ -37,7 +55,7 @@ def start_session():
     
     engine.reset()
     
-    initial_message = "Hello! I am your AI Technical Support Agent."
+    initial_message = f"Hello! I am your {kb.metadata.get('domain')}."
     
     # NLP Processing
     if user_input:
@@ -56,19 +74,25 @@ def start_session():
         # Check if we already have facts from NLP that didn't trigger a solution
         # If so, rely on the engine's next best question.
         # If not, use start default.
-        initial_question = "system_dead" 
-        # If system_dead is already known, pick another (simple logic for now)
+        # Pick the first question in the dictionary as a rough 'root' if no specific root logic
+        # For PC it was 'system_dead'. For Car it might be 'car_wont_start'.
+        # Better heuristic: first key in questions dict? Or a hardcoded map.
+        roots = {"pc": "system_dead", "car": "car_wont_start"}
+        initial_question = roots.get(current_domain)
+        
+        # If initial_question is already known, pick another (simple logic for now)
         if initial_question in engine.known_facts:
              # Let engine pick
              pass
         else:
              question_text = kb.get_question(initial_question)
-             return jsonify({
-                 "type": "QUESTION",
-                 "text": f"{initial_message} Let's verify. " + question_text,
-                 "fact": initial_question,
-                 "logs": engine.reasoning_log
-             })
+             if question_text:
+                 return jsonify({
+                     "type": "QUESTION",
+                     "text": f"{initial_message} Let's verify. " + question_text,
+                     "fact": initial_question,
+                     "logs": engine.reasoning_log
+                 })
              
     return jsonify({
         "type": type,
@@ -96,8 +120,9 @@ def learn_rule():
     # "IF symptoms THEN solution_id"
     kb.add_rule(symptoms, solution_id, explanation="Dynamically learned from user feedback.")
     
-    # 4. Save
-    kb.save_to_file("knowledge_base.json")
+    # 4. Save (to the correct file)
+    filename = "knowledge_base.json" if current_domain == "pc" else "car_knowledge_base.json"
+    kb.save_to_file(filename)
     
     return jsonify({"status": "success", "message": "I have learned this new solution!"})
     
@@ -115,7 +140,7 @@ def generate_report():
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     
-    pdf.cell(200, 10, txt="DIAGNOSTIC REPORT - SYNTECXHUB AI", ln=1, align="C")
+    pdf.cell(200, 10, txt=f"DIAGNOSTIC REPORT - {kb.metadata.get('domain').upper()}", ln=1, align="C")
     pdf.cell(200, 10, txt=f"Date: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", ln=1, align="C")
     pdf.ln(10)
     
