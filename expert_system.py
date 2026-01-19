@@ -5,6 +5,9 @@ A hybrid rule-based expert system supporting Forward and Backward chaining.
 Author: Hamid Kamal
 """
 
+# Copyright (c) 2026 Hamid Kamal
+# Syntecxhub AI Internship
+
 import json
 from typing import List, Dict, Set, Optional, Tuple
 
@@ -28,19 +31,55 @@ class KnowledgeBase:
         self.load_from_file(filepath)
 
     def load_from_file(self, filepath: str):
-        with open(filepath, 'r') as f:
-            data = json.load(f)
-            self.metadata = data.get("metadata", {})
-            self.questions = data.get("questions", {})
-            self.solutions = data.get("solutions", {})
-            for rule_data in data.get("rules", []):
-                self.rules.append(Rule(rule_data))
-        print(f"Loaded {len(self.rules)} rules for {self.metadata.get('domain')}")
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                self.metadata = data.get("metadata", {})
+                self.questions = data.get("questions", {})
+                self.solutions = data.get("solutions", {})
+                for rule_data in data.get("rules", []):
+                    self.rules.append(Rule(rule_data))
+            print(f"✓ Loaded {len(self.rules)} rules for {self.metadata.get('domain')}")
+        except FileNotFoundError:
+            print(f"✗ Error: Knowledge base file '{filepath}' not found!")
+            raise SystemExit(1)
+        except json.JSONDecodeError as e:
+            print(f"✗ Error: Invalid JSON in knowledge base - {e}")
+            raise SystemExit(1)
+
+    def save_to_file(self, filepath: str):
+        data = {
+            "metadata": self.metadata,
+            "rules": [
+                {"id": r.id, "if": list(r.conditions), "then": r.consequence, "explanation": r.explanation}
+                for r in self.rules
+            ],
+            "questions": self.questions,
+            "solutions": self.solutions
+        }
+        with open(filepath, 'w') as f:
+            json.dump(data, f, indent=4)
+            
+    def add_rule(self, conditions, consequence, explanation="Learned from user interaction"):
+        new_id = f"learned_rule_{len(self.rules) + 1}"
+        new_rule_data = {
+            "id": new_id,
+            "if": conditions,
+            "then": consequence,
+            "explanation": explanation
+        }
+        self.rules.append(Rule(new_rule_data))
+        # Ensure solution entry exists (simple placeholder if new)
+        if consequence not in self.solutions:
+            self.solutions[consequence] = {"text": "User defined solution.", "image": None}
+            
+        return new_id
 
     def get_question(self, fact_id: str) -> Optional[str]:
         return self.questions.get(fact_id)
 
-    def get_solution(self, fact_id: str) -> Optional[str]:
+    def get_solution(self, fact_id: str) -> Optional[Dict]:
+        # Returns dict {text, image} or None
         return self.solutions.get(fact_id)
 
 class InferenceEngine:
@@ -48,17 +87,23 @@ class InferenceEngine:
         self.kb = kb
         self.known_facts: Set[str] = set()
         self.inferred_facts: Set[str] = set()
+        self.queried_facts: Set[str] = set() # Facts we've already asked about
         self.reasoning_log: List[str] = []
 
     def reset(self):
         self.known_facts.clear()
         self.inferred_facts.clear()
+        self.queried_facts.clear()
         self.reasoning_log.clear()
 
     def add_fact(self, fact: str):
         if fact not in self.known_facts:
             self.known_facts.add(fact)
+            self.queried_facts.add(fact) # If we know it, we don't need to ask
             self.reasoning_log.append(f"Fact defined: {fact}")
+            
+    def mark_as_queried(self, fact: str):
+        self.queried_facts.add(fact)
 
     def forward_chain(self) -> List[str]:
         """
@@ -130,9 +175,12 @@ class InferenceEngine:
         # 1. Check for solutions first
         all_knowledge = self.known_facts | self.inferred_facts
         for fact in all_knowledge:
-            solution = self.kb.get_solution(fact)
-            if solution:
-                return "SOLUTION", solution
+            solution_data = self.kb.get_solution(fact)
+            if solution_data:
+                # Handle old format (string) vs new format (dict)
+                if isinstance(solution_data, str):
+                    return "SOLUTION", solution_data # backward compat
+                return "SOLUTION", f"{solution_data['text']}::{solution_data['image'] or ''}"
 
         # 2. Find best question
         # Simple heuristic: Find a rule that is partially satisfied and ask about the missing condition
@@ -146,7 +194,7 @@ class InferenceEngine:
                 continue # Already fired
             
             for condition in rule.conditions:
-                if condition not in all_knowledge:
+                if condition not in all_knowledge and condition not in self.queried_facts:
                     question = self.kb.get_question(condition)
                     if question:
                          # Found a question for a missing condition of a relevant rule

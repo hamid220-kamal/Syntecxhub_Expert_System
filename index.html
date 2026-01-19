@@ -1,102 +1,199 @@
 <!DOCTYPE html>
+<!-- 
+  Copyright (c) 2026 Hamid Kamal
+  Syntecxhub AI Internship
+-->
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Tech Support Expert | Syntecxhub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@300;500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
 
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo">
-                <i class="fa-solid fa-robot"></i>
-                <span>Syntecxhub AI</span>
-            </div>
+    <!-- Background Layers -->
+    <div class="bg-orbs"></div>
+    <canvas id="matrix-canvas"></canvas>
+    <canvas id="bg-particles"></canvas>
 
-            <div class="domain-selector">
-                <div class="domain-item active">
-                    <i class="fa-solid fa-laptop-medical"></i>
-                    <span>PC Repair</span>
-                </div>
-                <div class="domain-item disabled" title="Coming Soon">
-                    <i class="fa-solid fa-car-side"></i>
-                    <span>Car Diagnostics</span>
-                </div>
-            </div>
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
 
-            <div class="inference-log">
-                <h3><i class="fa-solid fa-brain"></i> AI Reasoning</h3>
-                <ul id="log-list">
-                    <!-- Logs appear here -->
-                </ul>
-            </div>
+    <div class="perspective-container">
+        <div class="app-container" id="app-card">
+            <!-- Main App Body -->
+            <div class="app-body">
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <div class="logo">
+                        <i class="fa-solid fa-robot"></i>
+                        <span>Syntecxhub AI</span>
+                    </div>
 
-            <div class="knowledge-graph-container">
-                <h3><i class="fa-solid fa-project-diagram"></i> Logic Graph</h3>
-                <div id="mynetwork"></div>
-            </div>
-        </aside>
-
-        <!-- Main Chat Area -->
-        <main class="chat-interface">
-            <header>
-                <div class="header-info">
-                    <h2>Universal Troubleshooter</h2>
-                    <p>Powered by Hybrid Rule-Based Engine</p>
-                </div>
-                <div class="header-controls">
-                    <button id="voice-toggle" class="icon-btn" title="Toggle Voice Output">
-                        <i class="fa-solid fa-volume-high"></i>
-                    </button>
-                    <button id="restart-btn" class="icon-btn secondary" title="Restart Session">
-                        <i class="fa-solid fa-rotate-right"></i>
-                    </button>
-                </div>
-            </header>
-
-            <div id="chat-box" class="chat-box">
-                <!-- Messages go here -->
-                <div class="message bot">
-                    <div class="avatar"><i class="fa-solid fa-robot"></i></div>
-                    <div class="content">
-                        Initializing Expert System...
-                        <div class="typing-indicator">
-                            <span></span><span></span><span></span>
+                    <div class="domain-selector">
+                        <div class="domain-item active" id="domain-pc" onclick="switchDomain('pc')">
+                            <i class="fa-solid fa-laptop-medical"></i>
+                            <span>PC Repair</span>
+                        </div>
+                        <div class="domain-item" id="domain-car" onclick="switchDomain('car')">
+                            <i class="fa-solid fa-car-side"></i>
+                            <span>Car Diagnostics</span>
                         </div>
                     </div>
-                </div>
+
+                    <div class="inference-log">
+                        <h3><i class="fa-solid fa-brain"></i> AI Reasoning</h3>
+                        <ul id="log-list">
+                            <!-- Logs appear here -->
+                        </ul>
+                    </div>
+
+                    <div class="knowledge-graph-container">
+                        <h3><i class="fa-solid fa-project-diagram"></i> Logic Graph</h3>
+                        <div id="mynetwork"></div>
+                    </div>
+                </aside>
+
+                <!-- Main Chat Area -->
+                <main class="chat-interface">
+                    <header>
+                        <div class="header-info">
+                            <h2>Expert Diagnostic Intelligence</h2>
+                            <p>Engineered by Hamid Kamal | Syntecxhub AI Intern</p>
+                        </div>
+                        <div class="header-controls">
+                            <canvas id="audio-visualizer" width="100" height="40"></canvas>
+                            <button id="info-btn" class="icon-btn" title="Project Information">
+                                <i class="fa-solid fa-circle-info"></i>
+                            </button>
+                            <button id="voice-toggle" class="icon-btn" title="Toggle Voice Output">
+                                <i class="fa-solid fa-volume-high"></i>
+                            </button>
+                            <button id="restart-btn" class="icon-btn secondary" title="Restart Session">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </button>
+                        </div>
+                    </header>
+
+                    <div id="chat-box" class="chat-box">
+                        <!-- Messages go here -->
+                        <div class="message bot">
+                            <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                            <div class="content">
+                                Initializing Expert System...
+                                <div class="typing-indicator">
+                                    <span></span><span></span><span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-area">
+                        <div id="options-container" class="options-container">
+                            <!-- Yes/No buttons will appear here -->
+                        </div>
+
+                        <div class="voice-input-wrapper">
+                            <button id="mic-btn" class="mic-btn">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
+                            <div class="status-text" id="status-text">Ready to listen...</div>
+                        </div>
+                    </div>
+                </main>
             </div>
 
-            <div class="input-area">
-                <div id="options-container" class="options-container">
-                    <!-- Yes/No buttons will appear here -->
-                </div>
+            <!-- Footer inside container -->
+            <div class="app-footer">
+                <span class="copyright">© 2026 Hamid Kamal</span> |
+                <span class="role">AI Engineering Intern</span> |
+                <a href="https://hamid-ai-dev.vercel.app/" target="_blank" class="portfolio-link">Portfolio
+                    Interface</a>
+            </div>
+        </div><!-- End app-container -->
+    </div><!-- End perspective-container -->
 
-                <div class="voice-input-wrapper">
-                    <button id="mic-btn" class="mic-btn">
-                        <i class="fa-solid fa-microphone"></i>
-                    </button>
-                    <div class="status-text" id="status-text">Ready to listen...</div>
+    <!-- Project Information Modal -->
+    <div id="info-modal" class="modal">
+        <div class="modal-content info-panel">
+            <i class="fa-solid fa-microchip info-icon"></i>
+            <h2>System Architecture</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <h4>Developer</h4>
+                    <p>Hamid Kamal</p>
+                </div>
+                <div class="info-item">
+                    <h4>Engine</h4>
+                    <p>Hybrid Rule-Based Inference</p>
+                </div>
+                <div class="info-item">
+                    <h4>Stack</h4>
+                    <p>Flask, Vis.js, NLP Fusion</p>
                 </div>
             </div>
-        </main>
+            <p class="info-desc">A state-of-the-art expert system designed for rapid hardware diagnostics and autonomous
+                machine learning.</p>
+            <button onclick="document.getElementById('info-modal').style.display='none'"
+                class="option-btn">Acknowledge</button>
+        </div>
     </div>
 
+    <!-- Diagnostic Dashboard Modal -->
+    <div id="dashboard-modal" class="modal">
+        <div class="modal-content dashboard-panel">
+            <h2 id="dashboard-title">Diagnostic Analysis</h2>
+            <div class="dashboard-stats">
+                <div class="dash-stat">
+                    <span id="dash-confidence" class="stat-value">--%</span>
+                    <span class="stat-label">System Confidence</span>
+                </div>
+                <div class="dash-stat">
+                    <span id="dash-steps" class="stat-value">--</span>
+                    <span class="stat-label">Inference Steps</span>
+                </div>
+            </div>
+            <div class="dashboard-conclusion">
+                <h4>Primary Recommendation</h4>
+                <p id="dash-conclusion-text">--</p>
+            </div>
+            <div class="modal-buttons">
+                <button id="dash-report-btn" class="option-btn">Generate Report</button>
+                <button onclick="document.getElementById('dashboard-modal').style.display='none'"
+                    class="option-btn secondary">Dismiss</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
     <div id="initial-input-modal" class="modal">
         <div class="modal-content">
-            <h2>Describe your problem</h2>
+            <h2>🔧 Describe Your Problem</h2>
             <p>Type what's wrong (e.g., "My screen is black and I hear beeps") or skip to manual diagnosis.</p>
             <textarea id="symptom-input" placeholder="Enter symptoms..."></textarea>
             <div class="modal-buttons">
                 <button id="start-nlp-btn" class="option-btn">Analyze & Start</button>
                 <button id="skip-nlp-btn" class="option-btn secondary">Skip</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="learning-modal" class="modal">
+        <div class="modal-content">
+            <h2>🧠 Teach Me</h2>
+            <p>I couldn't solve it. Tell me the solution so I can learn!</p>
+            <textarea id="learn-solution" placeholder="e.g., Replace the CMOS battery..."></textarea>
+            <div class="modal-buttons">
+                <button id="submit-learning" class="option-btn" style="background: var(--secondary);">Teach AI</button>
+                <button onclick="document.getElementById('learning-modal').style.display='none'"
+                    class="option-btn secondary">Cancel</button>
             </div>
         </div>
     </div>

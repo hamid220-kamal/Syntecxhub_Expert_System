@@ -1,49 +1,42 @@
-# AI Rule-Based Expert System (Universal Troubleshooter)
-> **Syntecxhub AI Internship - Project 2**
+# 🧠 Syntexchub Expert System
 
-An **Advanced AI Expert System** that diagnoses problems using a hybrid Rule-Based Engine (Forward & Backward Chaining). Features a modern voice-enabled web interface.
+> **Advanced AI-Powered Troubleshooting Assistant**  
+> *Built for the Syntecxhub AI Internship Program*
 
-## 🚀 Features
-- **🧠 Hybrid Inference Engine**: Combines forward reasoning (data-driven) and backward reasoning (goal-driven).
-- **🗣️ Voice Interaction**: Talk to the AI using your microphone and hear responses (Web Speech API).
-- **💬 Modern Chat UI**: Cyberpunk-inspired dark interface with typing indicators and animations.
-- **🔌 Pluggable Knowledge**: Logic is separated from data. Easily add `rules` for other domains (Car repair, Medical, etc.).
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Active-success)
 
-## 🛠️ Tech Stack
-- **Backend**: Python, Flask, Custom Inference Engine
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **AI**: Rule-Based Logic (Symbolic AI)
+Unlike traditional chatbots, this **Expert System** combines **Rule-Based Logic (Symbolic AI)** with modern **Natural Language Processing (NLP)** to diagnose problems like a real human expert. It features a futuristic, voice-enabled web interface.
 
-## 📦 Installation
+## ✨ Key Features
 
-1. **Clone the repo**
-   ```bash
-   git clone https://github.com/hamid220-kamal/Syntecxhub_Expert_System.git
-   cd Syntecxhub_Expert_System
-   ```
+- **🗣️ Voice-Activated**: Just speak to the AI! (Web Speech API)
+- **🧠 Hybrid Reasoning**: Uses Forward & Backward chaining for accurate diagnoses.
+- **🎨 Cyberpunk UI**: A stunning, animated, dark-themed interface.
+- **🔌 Scalable Engine**: Logic is separated from data (`knowledge_base.json`).
 
-2. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+## 🚀 Quick Start
 
-3. **Run the AI Server**
-   ```bash
-   python main.py
-   ```
+### 1. Installation
+```bash
+git clone https://github.com/hamid220-kamal/Syntecxhub_Expert_System.git
+cd Syntecxhub_Expert_System
+pip install -r requirements.txt
+```
 
-4. **Open in Browser**
-   - Navigate to `http://localhost:5000`
-   - Click the microphone to speak!
+### 2. Run the AI
+```bash
+python main.py
+```
+> Open **`http://localhost:5000`** in your browser and click the microphone 🎙️.
 
-## 💡 How it Works
-The system uses a JSON knowledge base (`knowledge_base.json`) containing:
-- **Rules**: Logic patterns (`IF symptoms THEN conclusion`).
-- **Questions**: Queries to ask the user.
-- **Solutions**: Final advice.
+## 📂 Project Structure
+- `expert_system.py`: The core inference engine.
+- `knowledge_base.json`: The brain (rules & logic).
+- `app.js`: Frontend voice & chat logic.
 
-The engine dynamically builds a decision tree based on your answers to find the root cause.
-
-## 👨‍💻 Author
-**Hamid Kamal**  
-Syntecxhub AI Internship Program
+---
+<p align="center">
+  <b>Developed by Hamid Kamal</b> • Syntecxhub Internship
+</p>

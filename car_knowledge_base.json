@@ -1,0 +1,88 @@
+{
+    "metadata": {
+        "domain": "Car Diagnostic Expert",
+        "description": "Diagnoses common vehicle starting and performance issues",
+        "version": "1.0"
+    },
+    "rules": [
+        {
+            "id": "car_start_1",
+            "if": [
+                "car_wont_start",
+                "silent_start"
+            ],
+            "then": "check_battery",
+            "explanation": "If the car won't start and is completely silent (no clicking), the battery is likely dead."
+        },
+        {
+            "id": "car_start_2",
+            "if": [
+                "car_wont_start",
+                "clicking_sound"
+            ],
+            "then": "check_starter",
+            "explanation": "Rapid clicking sounds usually indicate the starter motor or a weak battery."
+        },
+        {
+            "id": "car_start_3",
+            "if": [
+                "car_wont_start",
+                "cranks_but_no_start",
+                "has_fuel"
+            ],
+            "then": "check_spark_plugs",
+            "explanation": "If it cranks (engine turns over) and has fuel, it might be an ignition issue."
+        },
+        {
+            "id": "car_start_4",
+            "if": [
+                "car_wont_start",
+                "cranks_but_no_start",
+                "no_fuel"
+            ],
+            "then": "add_fuel",
+            "explanation": "The engine cannot run without fuel. This is a common oversight."
+        },
+        {
+            "id": "performance_1",
+            "if": [
+                "engine_check_light",
+                "rough_idle"
+            ],
+            "then": "check_MAF_sensor",
+            "explanation": "A rough idle with a check engine light often points to air intake sensor issues."
+        }
+    ],
+    "questions": {
+        "car_wont_start": "Is the car failing to start the engine?",
+        "silent_start": "When you turn the key/press start, is it completely silent (no sounds)?",
+        "clicking_sound": "Do you hear a rapid clicking noise when trying to start?",
+        "cranks_but_no_start": "Does the engine make a 'chug-chug' sound (cranking) but fails to run?",
+        "has_fuel": "Does the fuel gauge show that the tank has gas?",
+        "no_fuel": "Is the fuel tank empty or near empty?",
+        "engine_check_light": "Is the 'Check Engine' light illuminated on the dashboard?",
+        "rough_idle": "Does the engine shake or feel 'rough' when the car is stopped?"
+    },
+    "solutions": {
+        "check_battery": {
+            "text": "The battery is likely dead. Try jump-starting the car or replace the battery.",
+            "image": "https://media.giphy.com/media/l2Je5GqOxx0mXgmD6/giphy.gif"
+        },
+        "check_starter": {
+            "text": "The starter motor might be stuck or the battery is too weak. Check battery terminals first.",
+            "image": "https://media.giphy.com/media/3o7TKvxnDQzWq0hO1y/giphy.gif"
+        },
+        "check_spark_plugs": {
+            "text": "Inspect the spark plugs and ignition coils. They may need replacement.",
+            "image": "https://media.giphy.com/media/3o6Ztg250Jmy6c3faE/giphy.gif"
+        },
+        "add_fuel": {
+            "text": "Add fuel to the tank. It seems you ran out of gas.",
+            "image": null
+        },
+        "check_MAF_sensor": {
+            "text": "Clean or replace the Mass Air Flow (MAF) sensor.",
+            "image": null
+        }
+    }
+}
